@@ -190,11 +190,9 @@ async function resetPasswordService(operationId, newPassword) {
   const salt = await bcrypt.genSalt(10);
   encryptedPassword = await bcrypt.hash(newPassword, salt);
 
-  await UserAccount.findOneAndUpdate(
-    { email: operation.emailId },
-    { password: encryptedPassword }
-  );
-
+  const user = await UserAccount.findOne({ emailId: operation.emailId });
+  user.password = encryptedPassword;
+  user.save();
   operation.fulfilled = true;
   operation.save();
   return "Password RESET Successful";
@@ -220,7 +218,6 @@ async function loginService(emailId, password) {
     throw new Error("Account Not Verified");
   }
   // #endregion validations
-
   if (await bcrypt.compare(password, exist.password)) {
     return {
       firstName: exist.firstName,
