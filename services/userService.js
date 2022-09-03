@@ -186,9 +186,13 @@ async function resetPasswordService(operationId, newPassword) {
     throw new Error("Request Already Fulfilled");
   }
 
+  // encrypt password
+  const salt = await bcrypt.genSalt(10);
+  encryptedPassword = await bcrypt.hash(newPassword, salt);
+
   await UserAccount.findOneAndUpdate(
     { email: operation.emailId },
-    { password: newPassword }
+    { password: encryptedPassword }
   );
 
   operation.fulfilled = true;
